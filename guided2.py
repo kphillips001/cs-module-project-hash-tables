@@ -78,15 +78,60 @@ class HashTable:
   def resize(self):
     # Create a blank new array with double the size of the old array
     # We have to rehash every single item because the hash function has changed
-      # Have to go through each item in each linked lisdt in the array
-        # rehash the key in each item and store in new array
+      # go through each slot in the array
+        # go through each item in each linked list in the array
+          # rehash the key in each item and store in new array
     # make new array the new storage
+    pass
 
 table = HashTable(4)
-table.put('banana', 'banana is yellow')
-table.put('apple', 'apple is green')
-table.put('pickle', 'pickle is green')
-#collides with spot 0
-table.put('tomato', 'tomato is red')
-print(table.hash_array)
+table.put('banana', "banana is yellow")
+table.put('apple', "apple is green")
+table.put('pickle', "pickle is green")
+table.put('tomato', "tomato is red")
 print(table.get('pickle'))
+
+# Node Class
+class LinkedList:
+
+  def __init__(self):
+    self.head = None
+
+  def find(self, key):
+    current_node = self.head
+
+    while current_node is not None:
+      #compare the current node with that we are looking for
+      if current_node.key == key:
+        return current_node
+      current_node = current_node.next
+
+    return None
+
+  def insert_at_head(self, node):
+    # Link the node to the current HEAD
+    node.next = self.head
+    # Set head pointer to new node
+    self.head = node
+  
+  def delete(self, key):
+    #Handle the case where the node to delete is the HEAD
+    if key == self.head.key:
+      self.head = self.head.next
+      return self.head
+
+    prev = None
+    curr = self.head
+
+    while curr is not None:
+      # loop untilk we find the right key
+      if curr.key == key:
+        # found it!
+        prev.next = curr.next
+        return curr
+
+      #move the pointers over
+      prev = curr
+      curr = curr.next
+
+    return None
