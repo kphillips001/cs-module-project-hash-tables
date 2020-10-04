@@ -8,104 +8,161 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    def __repr__(self):
+        return f"HTEntry: ({self.key}, {self.value}) -> {self.next}"
+
+    def __str__(self):
+        return f"HTEntry: ({self.key}, {self.value}) -> {self.next}"
+
 
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
+Min_LF = .2
+Max_LF = .7
 
 
 class HashTable:
-    """
-    A hash table that with `capacity` buckets
-    that accepts string keys
-    Implement this.
-    """
 
     def __init__(self, capacity):
-        # Your code here
-        self.capacity = [None] * 8
+        self.hash_list = [None] * capacity
+        # update capacity when resizing, then we can just re use hash_list I think.
+        self.capacity = 8
+        self.occupied_slots = 0
+        # self.head = None
+
+    def __str__(self):
+        print(f"HashTable: ({self.hash_list}, {self.occupied_slots})")
 
     def get_num_slots(self):
-        """
-        Return the length of the list you're using to hold the hash
-        table data. (Not the number of items stored in the hash table,
-        but the number of slots in the main list.)
-        One of the tests relies on this.
-        Implement this.
-        """
-        # Your code here
+        # Return length of data-structure
+        return len(self.hash_list)
 
     def get_load_factor(self):
-        """
-        Return the load factor for this hash table.
-        Implement this.
-        """
-        # Your code here
-
-    def fnv1(self, key):
-        """
-        FNV-1 Hash, 64-bit
-        Implement this, and/or DJB2.
-        """
-
-        # Your code here
+        return round(self.occupied_slots / self.capacity, 1)
 
     def djb2(self, key):
-        """
-        DJB2 hash, 32-bit
-        Implement this, and/or FNV-1.
-        """
+
         encoded_str = key.encode()
         hash = 5381
         for x in encoded_str:
             hash = ((hash << 5) + hash) + x
-            print(hash)
+        # hashed_key = hash & 0xFFFFFFFF
         return hash & 0xFFFFFFFF
 
     def hash_index(self, key):
-        """
-        Take an arbitrary key and return a valid integer index
-        between within the storage capacity of the hash table.
-        """
-
-        # return self.fnv1(key) % self.capacity
-        return self.djb2(key) % len(self.capacity)
+        return self.djb2(key) % len(self.hash_list)
 
     def put(self, key, value):
+        loadFactor = self.get_load_factor()
+        index = self.hash_index(key)
+        curr_node = self.hash_list[index]
 
-        self.capacity[self.hash_index(key)] = value
-
-        """
-        Store the value with the given key.
-        Hash collisions should be handled with Linked List Chaining.
-        Implement this.
-        """
+        # Check load Factor first
+        print("LOAD FACTOR: ", loadFactor)
+        if loadFactor < Max_LF:
+            if curr_node is None:
+                new_node = self.hash_list[self.hash_index(key)] = value
+                self.occupied_slots += 1
+                print("NEW NODE:\n", new_node, "Index: ", index)
+                return new_node
+            if curr_node is not None:
+                new_node = HashTableEntry(key, value)
+                new_node.next = curr_node
+                new_node = self.hash_list[self.hash_index(key)] = value
+                self.occupied_slots += 1
+                print("NEW NODE:\n", new_node, "index: ", index)
+                return new_node
+        print("Load factor > .7", loadFactor)
+        return self.resize()
 
     def delete(self, key):
-        """
-        Remove the value stored with the given key.
-        Print a warning if the key is not found.
-        Implement this.
-        """
-        if self.capacity[self.hash_index(key)] is None:
+
+        if self.hash_list[self.hash_index(key)] is None:
             print("key not found")
+
+            # if Index occupied, BUT Key doesnt match:    CAN PROB DO ALL THIS IN FIND()
+            #     Iterate using next, to find key
+            #         if not found:
+            #             return not found
+            #         if Found :
+            #             value = none (delete)
+            #             subtract 1 from occupied slots.
+            # Check load factor, for being too small, if it is too small resize, smaller but min 8 slots.
+
         else:
-            self.capacity[self.hash_index(key)] = None
+            self.hash_list[self.hash_index(key)] = None
+
+        """
+        # Search through the linked list until we find the node to delete
+        # Delete the node if found
+        # Search the linked list for a Node with the same KEY as the one we are inserting
+                # If it exists:
+                    # change the value of the node
+                    # return
+            # if it doesnt exist do the following steps
+​
+            # the first item in the hash_list is the HEAD of the linked list
+            # Create a new hashTableEntry and add it to the HEAD of the linked list
+            # Make the new entry the new HEAD
+     """
 
     def get(self, key):
-        """
-        Retrieve the value stored with the given key.
-        Returns None if the key is not found.
-        Implement this.
-        """
-        return self.capacity[self.hash_index(key)]
 
-    def resize(self, new_capacity):
-        """
-        Changes the capacity of the hash table and
-        rehashes all key/value pairs.
-        Implement this.
-        """
-        # Your code here
+        Curr_key_index = self.hash_index(key)
+        arr_index = self.hash_list[Curr_key_index]
+        hash_key = self.djb2(key)
+
+        if Curr_key_index == arr_index:
+            # check to see if it matches key_hash.
+            # if index == key[index]:
+            print(self.hash_list[self.hash_index(key)], "Found key")
+            return self.hash_list[self.hash_index(key)]
+            #  If is doesnt match, then findNode method for LL
+        else:
+            print(
+                f" Not Found, see below: \n hashKey: {hash_key}, index: {Curr_key_index}, key: {key}")
+            # return self.findNode(key, index)
+            # return self.findNode(key)
+        # print("Key not found")
+        # return None
+
+    # def findNode(self, key, index):
+    #     # key = self.djb2(key)
+    #     current_node = self.head
+    #     # hash_key = self.djb2(key)
+    #     print("CURRENT NODE in FINDNODE:\n", current_node)
+    #     print("KEY IN FINDNODE:\n", key)
+
+    #     while current_node is not None:
+    #         if current_node == key:
+    #             print(current_node, "if equal key")
+    #             return current_node
+    #         current_node = current_node.next
+    #     return None
+
+        # Search / Loop through the linked list at the hashed index
+        # Compare the key to search to the keys in the nodes
+        # if you find it, return the value
+        # if not, return None
+
+    def resize(self):
+        # Create a blank new array with double the size of the old array
+        self.new_capacity = (self.capacity * 2)
+        new_arr = [None] * self.new_capacity
+        self.capacity = self.new_capacity
+        self.hash_list = new_arr
+
+        for node in self.hash_list:
+            curr_node = node
+            while curr_node is not None:
+                self.put(node.key, node.value)
+                curr_node = curr_node.next
+
+        # We have to rehash every single item because the hash function has changed
+        # go through each slot in the array
+        # go through each item in each linked list in the array
+        # rehash the key in each item and store in new array
+        # make new array the new storage
 
 
 if __name__ == "__main__":
@@ -115,7 +172,9 @@ if __name__ == "__main__":
     ht.put("line_2", "Did gyre and gimble in the wabe:")
     ht.put("line_3", "All mimsy were the borogoves,")
     ht.put("line_4", "And the mome raths outgrabe.")
-    ht.put("line_5", '"Beware the Jabberwock, my son!')
+    # ht.put("line_5", '"Beware the Jabberwock, my son!')
+    # ht.get("line_2")
+    # ht.get("line_1")
     ht.put("line_6", "The jaws that bite, the claws that catch!")
     ht.put("line_7", "Beware the Jubjub bird, and shun")
     ht.put("line_8", 'The frumious Bandersnatch!"')
