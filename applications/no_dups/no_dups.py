@@ -1,5 +1,14 @@
 def no_dups(s):
     # Your code here
+    # list = string split by spaces
+    l = s.split(' ')
+    # second list
+    new_list = []
+
+    for w in l:
+        if w not in new_list:
+            new_list.append(w)
+    return ' '.join(new_list)
 
 
 

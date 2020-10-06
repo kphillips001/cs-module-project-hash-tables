@@ -4,8 +4,8 @@ sqrt_table = {}
 ​
 def compute_inverse_square(n):
     # fairly expensive
-    result = 1 / math.sqrt(n)
-    return result
+  result = 1 / math.sqrt(n)
+  return result
 ​
 # As engineers we only need to find the inverse square of numbers less than 1000
 ​
